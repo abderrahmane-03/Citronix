@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Document(collection = "farms")
 @Data
@@ -26,10 +25,9 @@ public class Farm {
 
     @Positive(message = "Farm size must be a positive number.")
     @Min(value = 1, message = "Minimum farm size is 1 hectare.")
-    private double size; // Farm area in hectares
+    private double size;
 
     @PastOrPresent(message = "Creation date cannot be in the future.")
     private LocalDate creationDate;
 
-    private List<Field> fields; // Embedded fields in the farm
 }
