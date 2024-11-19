@@ -1,5 +1,7 @@
 package net.yc.citronix.service;
 
+import net.yc.citronix.DTO.FieldDTO;
+import net.yc.citronix.mapper.FieldMapper;
 import net.yc.citronix.model.Field;
 import net.yc.citronix.repository.FieldRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FieldService {
@@ -14,24 +17,40 @@ public class FieldService {
     @Autowired
     private FieldRepository fieldRepository;
 
-    public Field save(Field field){
-        return fieldRepository.save(field);
+    @Autowired
+    private FieldMapper fieldMapper;
+
+    // Save Field using DTO
+    public FieldDTO save(FieldDTO fieldDTO) {
+        Field field = fieldMapper.toEntity(fieldDTO);
+        Field savedField = fieldRepository.save(field);
+        return fieldMapper.toDTO(savedField);
     }
-    public List<Field> show(){
-        return fieldRepository.findAll();
+
+    // Get all Fields and return as DTOs
+    public List<FieldDTO> show() {
+        return fieldRepository.findAll()
+                .stream()
+                .map(fieldMapper::toDTO) // Convert each Field entity to DTO
+                .collect(Collectors.toList());
     }
-    public Field update(String id, Field updatedField) {
+
+    // Update Field using DTO
+    public FieldDTO update(String id, FieldDTO updatedFieldDTO) {
         Optional<Field> existingFieldOpt = fieldRepository.findById(id);
 
         if (existingFieldOpt.isPresent()) {
             Field existingField = existingFieldOpt.get();
-            existingField.setSize(updatedField.getSize());
-            existingField.setTreeCount(updatedField.getTreeCount());
-            return fieldRepository.save(existingField);
+            existingField.setSize(updatedFieldDTO.getSize());
+            existingField.setTreeCount(updatedFieldDTO.getTreeCount());
+            Field updatedField = fieldRepository.save(existingField);
+            return fieldMapper.toDTO(updatedField);
         } else {
             throw new IllegalArgumentException("Field with ID " + id + " not found.");
         }
     }
+
+    // Delete Field by ID
     public void delete(String id) {
         Optional<Field> field = fieldRepository.findById(id);
 
@@ -41,6 +60,4 @@ public class FieldService {
             throw new IllegalArgumentException("Field with ID " + id + " not found.");
         }
     }
-
-
 }

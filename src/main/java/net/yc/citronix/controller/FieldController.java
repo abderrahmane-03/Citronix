@@ -1,5 +1,6 @@
 package net.yc.citronix.controller;
 
+import net.yc.citronix.DTO.FieldDTO;
 import net.yc.citronix.model.Field;
 import net.yc.citronix.service.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,13 @@ public class FieldController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<String> createField(@RequestBody @Validated Field field) {
+    public ResponseEntity<String> createField(@RequestBody @Validated FieldDTO field) {
         fieldService.save(field);
         return ResponseEntity.ok("Field created successfully!");
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateField(@PathVariable String id, @RequestBody @Validated Field field) {
+    public ResponseEntity<String> updateField(@PathVariable String id, @RequestBody @Validated FieldDTO field) {
         fieldService.update(id, field);
         return ResponseEntity.ok("Field updated successfully!");
     }
@@ -37,7 +38,7 @@ public class FieldController {
     }
 
     @GetMapping("/AllFields")
-    public List<Field> showFields() {
+    public List<FieldDTO> showFields() {
         return fieldService.show();
     }
 }
