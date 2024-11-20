@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,5 +41,16 @@ public class FarmController {
     @GetMapping("/AllFarms")
     public List<FarmDTO> showFarms() {
         return farmService.show();
+    }
+    @GetMapping("/search")
+    public List<FarmDTO> searchFarms(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Double minSize,
+            @RequestParam(required = false) Double maxSize,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ) {
+        return farmService.searchFarms(name, location, minSize, maxSize, startDate, endDate);
     }
 }

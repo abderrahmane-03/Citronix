@@ -3,6 +3,8 @@ package net.yc.citronix.model;
 import lombok.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import net.yc.citronix.enums.Season;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +24,7 @@ public class Harvest {
 
     @NotBlank(message = "Season is required.")
     @Column(nullable = false)
-    private String season; // E.g., "Spring", "Summer", "Autumn", "Winter"
+    private Season season; // E.g., "Spring", "Summer", "Autumn", "Winter"
 
     @NotNull(message = "Harvest date is required.")
     @Column(name = "harvest_date", nullable = false)

@@ -1,14 +1,10 @@
 package net.yc.citronix.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import net.yc.citronix.DTO.FarmDTO;
 import net.yc.citronix.mapper.FarmMapper;
 import net.yc.citronix.model.Farm;
 import net.yc.citronix.repository.FarmRepository;
+import net.yc.citronix.repository.FarmSearchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,41 +21,13 @@ public class FarmService {
     private FarmRepository farmRepository;
 
     @Autowired
-    private FarmMapper farmMapper;
-
-
+    private FarmSearchRepository FarmSearchRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private FarmMapper farmMapper;
 
-    public List<Farm> searchFarms(String name, String location, Double minSize, Double maxSize, LocalDate startDate, LocalDate endDate) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Farm> query = cb.createQuery(Farm.class);
-        Root<Farm> farm = query.from(Farm.class);
-
-        Predicate predicate = cb.conjunction();
-
-        if (name != null && !name.isEmpty()) {
-            predicate = cb.and(predicate, cb.like(cb.lower(farm.get("name")), "%" + name.toLowerCase() + "%"));
-        }
-        if (location != null && !location.isEmpty()) {
-            predicate = cb.and(predicate, cb.like(cb.lower(farm.get("location")), "%" + location.toLowerCase() + "%"));
-        }
-        if (minSize != null) {
-            predicate = cb.and(predicate, cb.greaterThanOrEqualTo(farm.get("size"), minSize));
-        }
-        if (maxSize != null) {
-            predicate = cb.and(predicate, cb.lessThanOrEqualTo(farm.get("size"), maxSize));
-        }
-        if (startDate != null) {
-            predicate = cb.and(predicate, cb.greaterThanOrEqualTo(farm.get("creationDate"), startDate));
-        }
-        if (endDate != null) {
-            predicate = cb.and(predicate, cb.lessThanOrEqualTo(farm.get("creationDate"), endDate));
-        }
-
-        query.where(predicate);
-        return entityManager.createQuery(query).getResultList();
+    public List<FarmDTO> searchFarms(String name, String location, Double minSize, Double maxSize, LocalDate startDate, LocalDate endDate) {
+        return FarmSearchRepository.searchFarms(name, location, minSize, maxSize, startDate, endDate);
     }
     // Save Farm using DTO
     public FarmDTO save(FarmDTO farmDTO) {
