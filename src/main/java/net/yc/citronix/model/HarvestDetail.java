@@ -17,8 +17,7 @@ public class HarvestDetail {
     private String id;
 
     @NotBlank(message = "Tree ID is required.")
-    private String treeId; // Reference to the specific tree
-
+    private String treeId;
     @Positive(message = "Quantity must be a positive number.")
-    private double quantity; // Quantity harvested from the tree in kilograms
+    private double quantity;
 }

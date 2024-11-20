@@ -24,10 +24,10 @@ public class Sale {
     private LocalDate saleDate;
 
     @Positive(message = "Unit price must be a positive number.")
-    private double unitPrice; // Price per kilogram
+    private double unitPrice;
 
     @Positive(message = "Quantity must be a positive number.")
-    private double quantity; // Quantity sold in kilograms
+    private double quantity;
 
     @NotBlank(message = "Harvest ID is required.")
     private String harvestId; // Reference to the associated harvest

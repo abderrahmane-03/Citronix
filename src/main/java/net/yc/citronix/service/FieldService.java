@@ -20,22 +20,22 @@ public class FieldService {
     @Autowired
     private FieldMapper fieldMapper;
 
-    // Save Field using DTO
+
     public FieldDTO save(FieldDTO fieldDTO) {
         Field field = fieldMapper.toEntity(fieldDTO);
         Field savedField = fieldRepository.save(field);
         return fieldMapper.toDTO(savedField);
     }
 
-    // Get all Fields and return as DTOs
+
     public List<FieldDTO> show() {
         return fieldRepository.findAll()
                 .stream()
-                .map(fieldMapper::toDTO) // Convert each Field entity to DTO
+                .map(fieldMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Update Field using DTO
+
     public FieldDTO update(String id, FieldDTO updatedFieldDTO) {
         Optional<Field> existingFieldOpt = fieldRepository.findById(id);
 
@@ -50,7 +50,7 @@ public class FieldService {
         }
     }
 
-    // Delete Field by ID
+
     public void delete(String id) {
         Optional<Field> field = fieldRepository.findById(id);
 
