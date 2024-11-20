@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +37,7 @@ public class FieldService {
     }
 
 
-    public FieldDTO update(String id, FieldDTO updatedFieldDTO) {
+    public FieldDTO update(UUID id, FieldDTO updatedFieldDTO) {
         Optional<Field> existingFieldOpt = fieldRepository.findById(id);
 
         if (existingFieldOpt.isPresent()) {
@@ -51,7 +52,7 @@ public class FieldService {
     }
 
 
-    public void delete(String id) {
+    public void delete(UUID id) {
         Optional<Field> field = fieldRepository.findById(id);
 
         if (field.isPresent()) {

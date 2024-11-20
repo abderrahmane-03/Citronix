@@ -1,6 +1,8 @@
 package net.yc.citronix.repository;
 import net.yc.citronix.model.HarvestDetail;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface HarvestDetailRepository extends MongoRepository<HarvestDetail,String> {
+import java.util.UUID;
+
+public interface HarvestDetailRepository extends JpaRepository<HarvestDetail, UUID> {
 }

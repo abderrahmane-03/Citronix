@@ -5,6 +5,6 @@ import net.yc.citronix.model.Farm;
 import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
 
-@Mapper(config = BaseMapperConfig.class)
+@Mapper(componentModel = "spring")
 public interface FarmMapper extends BaseMapper<Farm, FarmDTO> {
 }

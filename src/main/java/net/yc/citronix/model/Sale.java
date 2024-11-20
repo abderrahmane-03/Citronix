@@ -1,13 +1,13 @@
 package net.yc.citronix.model;
 
-import jakarta.validation.constraints.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.UUID;
 
-@Document(collection = "sales")
+@Entity
+@Table(name = "sales")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,22 +15,30 @@ import java.time.LocalDate;
 public class Sale {
 
     @Id
-    private String id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
+    private UUID id = UUID.randomUUID();
 
     @NotBlank(message = "Client name is required.")
+    @Column(name = "client_name", nullable = false)
     private String clientName;
 
     @NotNull(message = "Sale date is required.")
+    @Column(name = "sale_date", nullable = false)
     private LocalDate saleDate;
 
     @Positive(message = "Unit price must be a positive number.")
+    @Column(name = "unit_price", nullable = false)
     private double unitPrice;
 
     @Positive(message = "Quantity must be a positive number.")
+    @Column(nullable = false)
     private double quantity;
 
     @NotBlank(message = "Harvest ID is required.")
+    @Column(name = "harvest_id", nullable = false)
     private String harvestId; // Reference to the associated harvest
 
+    @Column(nullable = false)
     private double revenue; // Automatically calculated: revenue = quantity * unitPrice
 }

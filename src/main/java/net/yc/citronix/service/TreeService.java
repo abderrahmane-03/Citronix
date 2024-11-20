@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +38,7 @@ public class TreeService {
         }
 
         // Update Tree using DTO
-        public TreeDTO update(String id, TreeDTO updatedTreeDTO) {
+        public TreeDTO update(UUID id, TreeDTO updatedTreeDTO) {
             Optional<Tree> existingTreeOpt = treeRepository.findById(id);
 
             if (existingTreeOpt.isPresent()) {
@@ -53,7 +54,7 @@ public class TreeService {
         }
 
         // Delete Tree by ID
-        public void delete(String id) {
+        public void delete(UUID id) {
             Optional<Tree> tree = treeRepository.findById(id);
 
             if (tree.isPresent()) {

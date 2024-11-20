@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -25,13 +26,13 @@ public class FarmController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateFarm(@PathVariable String id, @RequestBody @Validated FarmDTO farm) {
+    public ResponseEntity<String> updateFarm(@PathVariable UUID id, @RequestBody @Validated FarmDTO farm) {
         farmService.update(id, farm);
         return ResponseEntity.ok("Farm updated successfully!");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteFarm(@PathVariable String id) {
+    public ResponseEntity<String> deleteFarm(@PathVariable UUID id) {
         farmService.delete(id);
         return ResponseEntity.ok("Farm deleted successfully!");
     }

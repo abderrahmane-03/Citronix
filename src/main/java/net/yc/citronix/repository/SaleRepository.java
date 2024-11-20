@@ -1,7 +1,9 @@
 package net.yc.citronix.repository;
 
 import net.yc.citronix.model.Sale;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SaleRepository extends MongoRepository<Sale,String> {
+import java.util.UUID;
+
+public interface SaleRepository extends JpaRepository<Sale, UUID> {
 }

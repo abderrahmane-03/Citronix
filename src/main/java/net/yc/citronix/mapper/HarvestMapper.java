@@ -7,6 +7,6 @@ import net.yc.citronix.model.Harvest;
 import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
 
-@Mapper(config = BaseMapperConfig.class)
+@Mapper(componentModel = "spring")
 public interface HarvestMapper extends BaseMapper<Harvest, HarvestDTO> {
 }

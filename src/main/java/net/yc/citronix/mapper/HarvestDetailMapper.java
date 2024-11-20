@@ -5,8 +5,9 @@ import net.yc.citronix.DTO.TreeDTO;
 import net.yc.citronix.model.HarvestDetail;
 import net.yc.citronix.model.Tree;
 import org.mapstruct.Mapper;
+import org.mapstruct.MapperConfig;
 
-@Mapper(config = BaseMapperConfig.class)
+@Mapper(componentModel = "spring")
 public interface HarvestDetailMapper extends BaseMapper<HarvestDetail, HarvestDetailDTO> {
 
 

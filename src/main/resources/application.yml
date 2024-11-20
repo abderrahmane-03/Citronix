@@ -2,16 +2,25 @@ spring:
   application:
     name: Citronix
 
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017
-      database: Citronix
+  datasource:
+    url: jdbc:postgresql://localhost:5432/citronix
+    username: postgres
+    password: 200361816
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Options: validate, update, create, create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8081
+
 logging:
   level:
     root: INFO
     org.springframework.web: DEBUG
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.mongodb.driver: INFO
+    org.springframework.data.jpa: DEBUG
+    org.hibernate: INFO

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +38,7 @@ public class SaleService {
     }
 
     // Update Sale using DTO
-    public SaleDTO update(String id, SaleDTO updatedSaleDTO) {
+    public SaleDTO update(UUID id, SaleDTO updatedSaleDTO) {
         Optional<Sale> existingSaleOpt = saleRepository.findById(id);
 
         if (existingSaleOpt.isPresent()) {
@@ -56,7 +57,7 @@ public class SaleService {
     }
 
     // Delete Sale by ID
-    public void delete(String id) {
+    public void delete(UUID id) {
         Optional<Sale> sale = saleRepository.findById(id);
 
         if (sale.isPresent()) {
