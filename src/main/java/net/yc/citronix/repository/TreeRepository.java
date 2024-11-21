@@ -8,5 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TreeRepository extends JpaRepository<Tree, Long> {
-    List<Tree> findByFieldId(Long aLong);
+    List<Tree> findByFieldId(Long id);
+    Long countByFieldId(Long id);
+
 }

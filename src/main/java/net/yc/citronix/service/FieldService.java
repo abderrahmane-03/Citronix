@@ -63,12 +63,21 @@ public class FieldService {
             );
         }
 
+        // Calculate the maximum tree count based on field size
+        int maxTreeCount = calculateMaxTreeCount(fieldDTO.getSize());
+        fieldDTO.setTreeCount(maxTreeCount);
+
         // Map DTO to entity and save
         Field field = fieldMapper.toEntity(fieldDTO);
         Field savedField = fieldRepository.save(field);
         return fieldMapper.toDTO(savedField);
     }
 
+    // Helper method to calculate the maximum tree count based on field size
+    private int calculateMaxTreeCount(double fieldSize) {
+        // Convert field size from m² to hectares and multiply by 100 trees per hectare
+        return (int) Math.floor((fieldSize / 10000) * 100);
+    }
 
 
     public List<FieldDTO> show() {

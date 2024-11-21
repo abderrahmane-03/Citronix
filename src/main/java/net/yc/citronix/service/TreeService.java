@@ -2,7 +2,9 @@ package net.yc.citronix.service;
 
 import net.yc.citronix.DTO.TreeDTO;
 import net.yc.citronix.mapper.TreeMapper;
+import net.yc.citronix.model.Field;
 import net.yc.citronix.model.Tree;
+import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.TreeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 @Service
 public class TreeService {
 
+        @Autowired
+        private FieldRepository fieldRepository;
 
         @Autowired
         private TreeRepository treeRepository;
@@ -26,6 +30,33 @@ public class TreeService {
 
         // Save Tree using DTO
         public TreeDTO save(TreeDTO treeDTO) {
+            // Fetch the field ID associated with the tree
+            Long fieldId = treeDTO.getFieldId();
+            if (fieldId == null) {
+                throw new IllegalArgumentException("Field ID cannot be null.");
+            }
+
+            // Fetch the field details (assuming a FieldService or FieldRepository exists)
+            Optional<Field> optionalField = fieldRepository.findById(fieldId);
+            if (optionalField.isEmpty()) {
+                throw new IllegalArgumentException("Field not found for ID: " + fieldId);
+            }
+
+            Field field = optionalField.get();
+
+            // Calculate the maximum tree count for the field
+            int maxTreeCount = calculateMaxTreeCount(field.getSize());
+
+            // Count the current number of trees in the field
+            long currentTreeCount = treeRepository.countByFieldId(fieldId);
+            if (currentTreeCount >= maxTreeCount) {
+                throw new IllegalArgumentException(
+                        "Cannot add more trees to this field. Maximum allowed: " + maxTreeCount +
+                                ", Current: " + currentTreeCount
+                );
+            }
+
+            // Calculate and set tree age
             calculateAndSetTreeAge(treeDTO);
 
             // Validate the tree
@@ -38,6 +69,13 @@ public class TreeService {
             // Return the saved entity as a DTO
             return treeMapper.toDTO(savedTree);
         }
+
+    // Helper method to calculate the maximum tree count based on field size
+    private int calculateMaxTreeCount(double fieldSize) {
+        // Convert field size from m² to hectares and multiply by 100 trees per hectare
+        return (int) Math.floor((fieldSize / 10000) * 100);
+    }
+
     private void calculateAndSetTreeAge(TreeDTO treeDTO) {
         LocalDate plantationDate = treeDTO.getPlantationDate();
         long age = ChronoUnit.YEARS.between(plantationDate, LocalDate.now());
