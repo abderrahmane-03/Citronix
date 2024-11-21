@@ -2,7 +2,9 @@ package net.yc.citronix.service;
 
 import net.yc.citronix.DTO.SaleDTO;
 import net.yc.citronix.mapper.SaleMapper;
+import net.yc.citronix.model.Harvest;
 import net.yc.citronix.model.Sale;
+import net.yc.citronix.repository.HarvestRepository;
 import net.yc.citronix.repository.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,42 @@ public class SaleService {
     private SaleMapper saleMapper;
 
     // Save Sale using DTO
+    @Autowired
+    private HarvestRepository harvestRepository; // Assume this exists to interact with Harvest data
+
     public SaleDTO save(SaleDTO saleDTO) {
+        // Validate Harvest ID
+        Long harvestId = saleDTO.getHarvestId();
+        if (harvestId == null) {
+            throw new IllegalArgumentException("Harvest ID is required.");
+        }
+
+        // Fetch the total quantity for the given harvest
+        Optional<Harvest> optionalHarvest = harvestRepository.findById(harvestId);
+        if (optionalHarvest.isEmpty()) {
+            throw new IllegalArgumentException("Harvest not found for ID: " + harvestId);
+        }
+
+        Harvest harvest = optionalHarvest.get();
+        double quantity = harvest.getTotalQuantity();
+
+
+        // Calculate revenue
+        double revenue = quantity * saleDTO.getUnitPrice();
+        saleDTO.setQuantity(quantity);
+        saleDTO.setRevenue(revenue);
+
+        // Map DTO to entity and save
         Sale sale = saleMapper.toEntity(saleDTO);
         Sale savedSale = saleRepository.save(sale);
+
+        // Update the remaining quantity in the harvest
+        harvestRepository.save(harvest);
+
+        // Return the saved entity as a DTO
         return saleMapper.toDTO(savedSale);
     }
+
 
     // Get all Sales and return as DTOs
     public List<SaleDTO> show() {
