@@ -3,8 +3,7 @@ import lombok.Data;
 
 @Data
 public class HarvestDetailDTO {
-    private String id;
-    private String treeId;
+    private Long id;
+    private Long treeId;
     private double Quantity;
-
 }

@@ -1,5 +1,7 @@
 package net.yc.citronix.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -10,22 +12,23 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "harvests")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "harvests", uniqueConstraints = @UniqueConstraint(columnNames = {"field_id", "season"}))
 public class Harvest {
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
-    @NotBlank(message = "Season is required.")
+    @NotNull(message = "Season is required.")
     @Column(nullable = false)
     private Season season; // E.g., "Spring", "Summer", "Autumn", "Winter"
 
+
+    @JsonFormat(pattern = "yyyy-M-d")
     @NotNull(message = "Harvest date is required.")
     @Column(name = "harvest_date", nullable = false)
     private LocalDate harvestDate;
@@ -34,10 +37,11 @@ public class Harvest {
     @Column(name = "total_quantity", nullable = false)
     private double totalQuantity; // Total quantity harvested in kilograms
 
-    @NotBlank(message = "Field ID is required.")
-    @Column(name = "field_id", nullable = false)
-    private String fieldId; // Reference to the field being harvested
+    @ManyToOne
+    @JoinColumn(name = "field_id", nullable = false)
+    private Field field; // Reference to the field being harvested
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "harvest", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<HarvestDetail> harvestDetails; // Details of the harvest by tree
 }

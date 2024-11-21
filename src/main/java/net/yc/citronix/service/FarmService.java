@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +44,7 @@ public class FarmService {
     }
 
     // Update Farm using DTO
-    public FarmDTO update(UUID id, FarmDTO updatedFarmDTO) {
+    public FarmDTO update(Long id, FarmDTO updatedFarmDTO) {
         Optional<Farm> existingFarmOpt = farmRepository.findById(id);
 
         if (existingFarmOpt.isPresent()) {
@@ -62,7 +61,7 @@ public class FarmService {
     }
 
     // Delete Farm by ID
-    public void delete(UUID id) {
+    public void delete(Long id) {
         Optional<Farm> farm = farmRepository.findById(id);
 
         if (farm.isPresent()) {

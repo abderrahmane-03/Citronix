@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 
 @RestController
@@ -27,13 +26,13 @@ public class TreeController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateTree(@PathVariable UUID id, @RequestBody @Validated TreeDTO tree) {
+    public ResponseEntity<String> updateTree(@PathVariable Long id, @RequestBody @Validated TreeDTO tree) {
         treeService.update(id, tree);
         return ResponseEntity.ok("Tree updated successfully!");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteTree(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteTree(@PathVariable Long id) {
         treeService.delete(id);
         return ResponseEntity.ok("Tree deleted successfully!");
     }

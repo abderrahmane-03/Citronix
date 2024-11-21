@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 
 @RestController
@@ -22,18 +21,18 @@ public class HarvestController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createHarvest(@RequestBody @Validated HarvestDTO harvest) {
-        harvestService.save(harvest);
+        harvestService.generateHarvest(harvest);
         return ResponseEntity.ok("Harvest created successfully!");
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateHarvest(@PathVariable UUID id, @RequestBody @Validated HarvestDTO harvest) {
+    public ResponseEntity<String> updateHarvest(@PathVariable Long id, @RequestBody @Validated HarvestDTO harvest) {
         harvestService.update(id, harvest);
         return ResponseEntity.ok("Harvest updated successfully!");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteHarvest(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteHarvest(@PathVariable Long id) {
         harvestService.delete(id);
         return ResponseEntity.ok("Harvest deleted successfully!");
     }

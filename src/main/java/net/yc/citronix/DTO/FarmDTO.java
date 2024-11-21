@@ -2,10 +2,11 @@ package net.yc.citronix.DTO;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 public class FarmDTO {
-    private String id;
+    private Long id;
     private String name;
     private String location;
     private double size;

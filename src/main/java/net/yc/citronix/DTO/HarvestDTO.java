@@ -1,5 +1,6 @@
 package net.yc.citronix.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,11 +13,11 @@ import java.util.List;
 
 @Data
 public class HarvestDTO {
-    private String id;
+    private Long id;
     private Season season;
     private LocalDate harvestDate;
     private double totalQuantity;
-    private String fieldId;
+    private Long fieldId;
     private List<HarvestDetail> harvestDetails;
 
 }

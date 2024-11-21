@@ -12,11 +12,11 @@ import java.time.LocalDate;
 public class SaleDTO {
 
 
-    private String id;
+    private Long id;
     private String clientName;
     private LocalDate saleDate;
     private double unitPrice;
     private double quantity;
-    private String harvestId;
+    private Long harvestId;
     private double revenue;
 }

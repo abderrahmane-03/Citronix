@@ -1,5 +1,6 @@
 package net.yc.citronix.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -15,13 +16,12 @@ import java.util.UUID;
 public class HarvestDetail {
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
-    @NotBlank(message = "Tree ID is required.")
+    @NotNull(message = "Tree ID is required.")
     @Column(name = "tree_id", nullable = false)
-    private String treeId;
+    private Long treeId;
 
     @Positive(message = "Quantity must be a positive number.")
     @Column(nullable = false)
@@ -29,5 +29,6 @@ public class HarvestDetail {
 
     @ManyToOne
     @JoinColumn(name = "harvest_id", nullable = false)
+    @JsonBackReference
     private Harvest harvest;
 }

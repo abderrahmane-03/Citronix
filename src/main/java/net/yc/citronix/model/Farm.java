@@ -17,9 +17,8 @@ public class Farm {
 
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
 
     @NotBlank(message = "Farm name is required.")
@@ -31,7 +30,7 @@ public class Farm {
     private String location;
 
     @Positive(message = "Farm size must be a positive number.")
-    @Min(value = 1, message = "Minimum farm size is 1 hectare.")
+    @DecimalMin(value = "0.2", message = "Minimum farm size is 0.2 hectare.")
     @Column(nullable = false)
     private double size;
 

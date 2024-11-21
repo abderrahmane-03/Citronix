@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 
 @RestController
@@ -27,13 +26,13 @@ public class FarmController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateFarm(@PathVariable UUID id, @RequestBody @Validated FarmDTO farm) {
+    public ResponseEntity<String> updateFarm(@PathVariable Long id, @RequestBody @Validated FarmDTO farm) {
         farmService.update(id, farm);
         return ResponseEntity.ok("Farm updated successfully!");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteFarm(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteFarm(@PathVariable Long id) {
         farmService.delete(id);
         return ResponseEntity.ok("Farm deleted successfully!");
     }

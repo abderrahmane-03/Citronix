@@ -7,10 +7,8 @@ import net.yc.citronix.repository.HarvestDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +36,7 @@ public class HarvestDetailService {
     }
 
     // Update HarvestDetail using DTO
-    public HarvestDetailDTO update(UUID id, HarvestDetailDTO updatedHarvestDetailDTO) {
+    public HarvestDetailDTO update(Long id, HarvestDetailDTO updatedHarvestDetailDTO) {
         Optional<HarvestDetail> existingHarvestDetailOpt = harvestDetailRepository.findById(id);
 
         if (existingHarvestDetailOpt.isPresent()) {
@@ -53,7 +51,7 @@ public class HarvestDetailService {
     }
 
     // Delete HarvestDetail by ID
-    public void delete(UUID id) {
+    public void delete(Long id) {
         Optional<HarvestDetail> harvestDetail = harvestDetailRepository.findById(id);
 
         if (harvestDetail.isPresent()) {

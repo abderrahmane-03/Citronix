@@ -15,9 +15,8 @@ import java.util.UUID;
 public class Sale {
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
     @NotBlank(message = "Client name is required.")
     @Column(name = "client_name", nullable = false)
@@ -35,9 +34,9 @@ public class Sale {
     @Column(nullable = false)
     private double quantity;
 
-    @NotBlank(message = "Harvest ID is required.")
+    @NotNull(message = "Harvest ID is required.")
     @Column(name = "harvest_id", nullable = false)
-    private String harvestId; // Reference to the associated harvest
+    private Long harvestId; // Reference to the associated harvest
 
     @Column(nullable = false)
     private double revenue; // Automatically calculated: revenue = quantity * unitPrice
