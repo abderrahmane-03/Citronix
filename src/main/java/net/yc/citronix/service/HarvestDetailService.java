@@ -4,6 +4,7 @@ import net.yc.citronix.DTO.HarvestDetailDTO;
 import net.yc.citronix.mapper.HarvestDetailMapper;
 import net.yc.citronix.model.HarvestDetail;
 import net.yc.citronix.repository.HarvestDetailRepository;
+import net.yc.citronix.serviceInterface.HarvestDetailServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class HarvestDetailService {
+public class HarvestDetailService implements HarvestDetailServiceINF {
 
     @Autowired
     private HarvestDetailRepository harvestDetailRepository;

@@ -5,6 +5,7 @@ import net.yc.citronix.mapper.FarmMapper;
 import net.yc.citronix.model.Farm;
 import net.yc.citronix.repository.FarmRepository;
 import net.yc.citronix.repository.FarmSearchRepository;
+import net.yc.citronix.serviceInterface.FarmServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FarmService {
+public class FarmService implements FarmServiceINF {
 
     @Autowired
     private FarmRepository farmRepository;

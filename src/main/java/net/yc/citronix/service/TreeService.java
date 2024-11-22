@@ -6,6 +6,7 @@ import net.yc.citronix.model.Field;
 import net.yc.citronix.model.Tree;
 import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.TreeRepository;
+import net.yc.citronix.serviceInterface.TreeServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class TreeService {
+public class TreeService implements TreeServiceINF {
 
         @Autowired
         private FieldRepository fieldRepository;
@@ -71,12 +72,12 @@ public class TreeService {
         }
 
     // Helper method to calculate the maximum tree count based on field size
-    private int calculateMaxTreeCount(double fieldSize) {
+    public int calculateMaxTreeCount(double fieldSize) {
         // Convert field size from m² to hectares and multiply by 100 trees per hectare
         return (int) Math.floor((fieldSize / 10000) * 100);
     }
 
-    private void calculateAndSetTreeAge(TreeDTO treeDTO) {
+    public void calculateAndSetTreeAge(TreeDTO treeDTO) {
         LocalDate plantationDate = treeDTO.getPlantationDate();
         long age = ChronoUnit.YEARS.between(plantationDate, LocalDate.now());
 
@@ -89,7 +90,7 @@ public class TreeService {
         }
         treeDTO.setAge((int) age); // Assuming age is an integer
     }
-    private void validateTree(TreeDTO treeDTO) {
+    public void validateTree(TreeDTO treeDTO) {
         LocalDate plantationDate = treeDTO.getPlantationDate();
         Month month = plantationDate.getMonth();
 
