@@ -1,12 +1,14 @@
 package net.yc.citronix.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-@Document(collection = "harvestDetails")
+import java.util.UUID;
+
+@Entity
+@Table(name = "harvest_details")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,11 +16,19 @@ import jakarta.validation.constraints.*;
 public class HarvestDetail {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
-    @NotBlank(message = "Tree ID is required.")
-    private String treeId; // Reference to the specific tree
+    @NotNull(message = "Tree ID is required.")
+    @Column(name = "tree_id", nullable = false)
+    private Long treeId;
 
     @Positive(message = "Quantity must be a positive number.")
-    private double quantity; // Quantity harvested from the tree in kilograms
+    @Column(nullable = false)
+    private double quantity;
+
+    @ManyToOne
+    @JoinColumn(name = "harvest_id", nullable = false)
+    @JsonBackReference
+    private Harvest harvest;
 }

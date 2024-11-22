@@ -1,35 +1,41 @@
 package net.yc.citronix.model;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.UUID;
 
-@Document(collection = "farms")
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "farms")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Farm {
 
+
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
+
 
     @NotBlank(message = "Farm name is required.")
+    @Column(nullable = false)
     private String name;
 
     @NotBlank(message = "Farm location is required.")
+    @Column(nullable = false)
     private String location;
 
     @Positive(message = "Farm size must be a positive number.")
-    @Min(value = 1, message = "Minimum farm size is 1 hectare.")
-    private double size; // Farm area in hectares
+    @DecimalMin(value = "0.2", message = "Minimum farm size is 0.2 hectare.")
+    @Column(nullable = false)
+    private double size;
 
     @PastOrPresent(message = "Creation date cannot be in the future.")
+    @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
 
-    private List<Field> fields; // Embedded fields in the farm
 }

@@ -1,35 +1,47 @@
 package net.yc.citronix.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
-import net.yc.citronix.model.HarvestDetail;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import net.yc.citronix.enums.Season;
+
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
-@Document(collection = "harvests")
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "harvests", uniqueConstraints = @UniqueConstraint(columnNames = {"field_id", "season"}))
 public class Harvest {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
-    @NotBlank(message = "Season is required.")
-    private String season; // E.g., "Spring", "Summer", "Autumn", "Winter"
+    @NotNull(message = "Season is required.")
+    @Column(nullable = false)
+    private Season season; // E.g., "Spring", "Summer", "Autumn", "Winter"
 
+
+    @JsonFormat(pattern = "yyyy-M-d")
     @NotNull(message = "Harvest date is required.")
+    @Column(name = "harvest_date", nullable = false)
     private LocalDate harvestDate;
 
     @Positive(message = "Total quantity must be a positive number.")
+    @Column(name = "total_quantity", nullable = false)
     private double totalQuantity; // Total quantity harvested in kilograms
 
-    @NotBlank(message = "Field ID is required.")
-    private String fieldId; // Reference to the field being harvested
+    @ManyToOne
+    @JoinColumn(name = "field_id", nullable = false)
+    private Field field; // Reference to the field being harvested
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "harvest", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<HarvestDetail> harvestDetails; // Details of the harvest by tree
 }

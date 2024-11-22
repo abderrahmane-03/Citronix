@@ -1,12 +1,14 @@
 package net.yc.citronix.model;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-@Document(collection = "fields")
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "fields")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,15 +16,22 @@ import jakarta.validation.constraints.*;
 public class Field {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id ;
 
     @Positive(message = "Field size must be a positive number.")
-    @Min(value = 1, message = "Minimum field size is 0.1 hectare.")
-    @Max(value = 50, message = "Field size cannot exceed 50% of the farm's total size.")
-    private double size; // Field size in hectares
+    @DecimalMin(value = "0.1", message = "Minimum field size is 0.1 hectare.")
+    @Column(nullable = false)
+    private double size;
 
-    private String farmId; // Reference to the farm
+    @NotNull(message = "Farm ID is required.")
+    @Column(name = "farm_id", nullable = false)
+    private Long farmId; // Reference to the farm
 
     @PositiveOrZero(message = "Tree count must be zero or a positive number.")
+    @Column(name = "tree_count", nullable = false)
     private int treeCount; // Number of trees in this field
+
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
+    private List<Harvest> harvests;
 }
