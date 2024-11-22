@@ -6,6 +6,7 @@ import net.yc.citronix.model.Harvest;
 import net.yc.citronix.model.Sale;
 import net.yc.citronix.repository.HarvestRepository;
 import net.yc.citronix.repository.SaleRepository;
+import net.yc.citronix.serviceInterface.SaleServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class SaleService {
+public class SaleService implements SaleServiceINF {
 
 
     @Autowired

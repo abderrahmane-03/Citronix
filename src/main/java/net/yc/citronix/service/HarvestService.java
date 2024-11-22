@@ -9,6 +9,7 @@ import net.yc.citronix.model.HarvestDetail;
 import net.yc.citronix.model.Tree;
 import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.HarvestRepository;
+import net.yc.citronix.serviceInterface.HarvestServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class HarvestService {
+public class HarvestService implements HarvestServiceINF {
 
     @Autowired
     private FieldService fieldService;
@@ -54,7 +55,7 @@ public class HarvestService {
     }
 
     // Helper method to calculate productivity based on age
-    private double calculateTreeProductivity(int age) {
+    public double calculateTreeProductivity(int age) {
         if (age < 3) {
             return 2.5; // Young tree productivity
         } else if (age <= 10) {
@@ -66,7 +67,7 @@ public class HarvestService {
             return 0; // Old tree productivity
         }
     }
-    private Season determineSeason(int month) {
+    public Season determineSeason(int month) {
         if (month == 12 || month == 1 || month == 2) {
             return Season.WINTER;
         } else if (month >= 3 && month <= 5) {

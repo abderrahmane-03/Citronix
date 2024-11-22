@@ -8,6 +8,7 @@ import net.yc.citronix.model.Tree;
 import net.yc.citronix.repository.FarmRepository;
 import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.TreeRepository;
+import net.yc.citronix.serviceInterface.FieldServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FieldService {
+public class FieldService implements FieldServiceINF {
 
     @Autowired
     private FieldRepository fieldRepository;
@@ -73,8 +74,7 @@ public class FieldService {
         return fieldMapper.toDTO(savedField);
     }
 
-    // Helper method to calculate the maximum tree count based on field size
-    private int calculateMaxTreeCount(double fieldSize) {
+    public int calculateMaxTreeCount(double fieldSize) {
         // Convert field size from m² to hectares and multiply by 100 trees per hectare
         return (int) Math.floor((fieldSize / 10000) * 100);
     }
