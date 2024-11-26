@@ -1,8 +1,10 @@
 package net.yc.citronix.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.FieldDTO;
 import net.yc.citronix.model.Field;
 import net.yc.citronix.service.FieldService;
+import net.yc.citronix.serviceInterface.FieldServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -10,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/field")
 public class FieldController {
 
-    @Autowired
-    private FieldService fieldService;
+
+    private final FieldServiceINF fieldService;
 
 
     @PostMapping("/create")

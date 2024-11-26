@@ -6,7 +6,4 @@ import org.mapstruct.Mapper;
 
 @Mapper(config = BaseMapper.class)
 public interface HarvestDetailMapper extends BaseMapper<HarvestDetail, HarvestDetailDTO> {
-
-
-
 }
