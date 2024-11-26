@@ -27,12 +27,13 @@ public class Tree {
 
     @Positive(message = "Tree age must be a positive number.")
     @Column(nullable = false)
-    private int age; // Automatically calculated based on plantation date
+    private int age;
 
-    @NotNull(message = "Field ID is required.")
-    @Column(name = "field_id", nullable = false)
-    private Long fieldId; // Reference to the field where the tree is located
+    @ManyToOne
+    @JoinColumn(name = "field_id", nullable = false)
+    private Field field;
 
     @Column(nullable = false)
-    private boolean productive; // Indicates if the tree is still productive
+    private boolean productive;
+
 }

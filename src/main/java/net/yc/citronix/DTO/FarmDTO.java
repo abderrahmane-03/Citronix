@@ -6,11 +6,11 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import java.time.LocalDate;
-
 @Data
 public class FarmDTO {
 
     private Long id;
+
     @NotBlank(message = "Farm name is required.")
     @Column(nullable = false)
     private String name;

@@ -1,7 +1,7 @@
 package net.yc.citronix.DTO;
+import jakarta.persistence.JoinColumn;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-
 
 @Data
 public class FieldDTO {
@@ -16,7 +16,9 @@ public class FieldDTO {
     private int treeCount;
 
     @NotNull(message = "Farm ID is required.")
-    private Long farmId;
+    @JoinColumn(name = "farm_id", nullable = false)
+    private FarmDTO farm;
+
 
 
 }

@@ -3,6 +3,7 @@ package net.yc.citronix.model;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -20,7 +21,6 @@ public class Farm {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id ;
 
-
     @NotBlank(message = "Farm name is required.")
     @Column(nullable = false)
     private String name;
@@ -37,5 +37,8 @@ public class Farm {
     @PastOrPresent(message = "Creation date cannot be in the future.")
     @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "farm", fetch = FetchType.LAZY)
+    private List<Field> fields;
 
 }

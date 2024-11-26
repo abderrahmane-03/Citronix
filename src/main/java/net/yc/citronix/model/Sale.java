@@ -36,8 +36,8 @@ public class Sale {
 
     @NotNull(message = "Harvest ID is required.")
     @Column(name = "harvest_id", nullable = false)
-    private Long harvestId; // Reference to the associated harvest
+    private Long harvestId;
 
     @Column(nullable = false)
-    private double revenue; // Automatically calculated: revenue = quantity * unitPrice
+    private double revenue;
 }

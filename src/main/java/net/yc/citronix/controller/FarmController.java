@@ -1,7 +1,9 @@
 package net.yc.citronix.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.FarmDTO;
 import net.yc.citronix.service.FarmService;
+import net.yc.citronix.serviceInterface.FarmServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -10,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/farm")
 public class FarmController {
 
-    @Autowired
-    private FarmService farmService;
+
+    private final FarmServiceINF farmService;
 
 
     @PostMapping("/create")
@@ -41,6 +43,7 @@ public class FarmController {
     public List<FarmDTO> showFarms() {
         return farmService.show();
     }
+
     @GetMapping("/search")
     public List<FarmDTO> searchFarms(
             @RequestParam(required = false) String name,
@@ -52,4 +55,7 @@ public class FarmController {
     ) {
         return farmService.searchFarms(name, location, minSize, maxSize, startDate, endDate);
     }
+
+
+
 }

@@ -25,8 +25,7 @@ public class Harvest {
 
     @NotNull(message = "Season is required.")
     @Column(nullable = false)
-    private Season season; // E.g., "Spring", "Summer", "Autumn", "Winter"
-
+    private Season season;
 
     @JsonFormat(pattern = "yyyy-M-d")
     @NotNull(message = "Harvest date is required.")
@@ -35,13 +34,12 @@ public class Harvest {
 
     @Positive(message = "Total quantity must be a positive number.")
     @Column(name = "total_quantity", nullable = false)
-    private double totalQuantity; // Total quantity harvested in kilograms
+    private double totalQuantity;
 
     @ManyToOne
     @JoinColumn(name = "field_id", nullable = false)
-    private Field field; // Reference to the field being harvested
+    private Field field;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "harvest", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<HarvestDetail> harvestDetails; // Details of the harvest by tree
+    private List<HarvestDetail> harvestDetails;
 }

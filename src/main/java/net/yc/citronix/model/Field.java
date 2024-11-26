@@ -1,5 +1,7 @@
 package net.yc.citronix.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -24,13 +26,18 @@ public class Field {
     @Column(nullable = false)
     private double size;
 
-    @NotNull(message = "Farm ID is required.")
-    @Column(name = "farm_id", nullable = false)
-    private Long farmId; // Reference to the farm
-
     @PositiveOrZero(message = "Tree count must be zero or a positive number.")
     @Column(name = "tree_count", nullable = false)
-    private int treeCount; // Number of trees in this field
+    private int treeCount;
+
+
+    @ManyToOne
+    @NotNull(message = "Farm ID is required.")
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
+    private List<Tree> trees;
 
     @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     private List<Harvest> harvests;

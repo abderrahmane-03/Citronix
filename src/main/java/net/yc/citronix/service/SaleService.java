@@ -1,13 +1,15 @@
 package net.yc.citronix.service;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.SaleDTO;
+import net.yc.citronix.exceptions.FieldNotFoundException;
+import net.yc.citronix.exceptions.SaleNotFoundException;
 import net.yc.citronix.mapper.SaleMapper;
 import net.yc.citronix.model.Harvest;
 import net.yc.citronix.model.Sale;
 import net.yc.citronix.repository.HarvestRepository;
 import net.yc.citronix.repository.SaleRepository;
 import net.yc.citronix.serviceInterface.SaleServiceINF;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,81 +17,70 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SaleService implements SaleServiceINF {
 
 
-    @Autowired
-    private SaleRepository saleRepository;
+    private final SaleRepository saleRepository;
 
-    @Autowired
-    private SaleMapper saleMapper;
 
-    // Save Sale using DTO
-    @Autowired
-    private HarvestRepository harvestRepository; // Assume this exists to interact with Harvest data
+    private final SaleMapper saleMapper;
+
+
+    private final HarvestRepository harvestRepository; // Assume this exists to interact with Harvest data
 
     public SaleDTO save(SaleDTO saleDTO) {
-        // Validate Harvest ID
+
         Long harvestId = saleDTO.getHarvestId();
-        if (harvestId == null) {
-            throw new IllegalArgumentException("Harvest ID is required.");
-        }
+        Harvest harvest = harvestRepository.findById(harvestId)
+                .orElseThrow(() -> new FieldNotFoundException("Harvest with ID " + harvestId + " not found."));
 
-        // Fetch the total quantity for the given harvest
-        Optional<Harvest> optionalHarvest = harvestRepository.findById(harvestId);
-        if (optionalHarvest.isEmpty()) {
-            throw new IllegalArgumentException("Harvest not found for ID: " + harvestId);
-        }
+        double TotalQuantity = harvest.getTotalQuantity();
 
-        Harvest harvest = optionalHarvest.get();
-        double quantity = harvest.getTotalQuantity();
-
-
-        // Calculate revenue
-        double revenue = quantity * saleDTO.getUnitPrice();
-        saleDTO.setQuantity(quantity);
+        saleDTO.setQuantity(TotalQuantity);
+        double revenue = TotalQuantity * saleDTO.getUnitPrice();
         saleDTO.setRevenue(revenue);
 
-        // Map DTO to entity and save
         Sale sale = saleMapper.toEntity(saleDTO);
         Sale savedSale = saleRepository.save(sale);
 
-        // Update the remaining quantity in the harvest
-        harvestRepository.save(harvest);
-
-        // Return the saved entity as a DTO
         return saleMapper.toDTO(savedSale);
     }
 
 
-    // Get all Sales and return as DTOs
+
     public List<SaleDTO> show() {
         return saleRepository.findAll()
                 .stream()
-                .map(saleMapper::toDTO) // Convert each Sale entity to DTO
+                .map(saleMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Update Sale using DTO
+    @Override
     public SaleDTO update(Long id, SaleDTO updatedSaleDTO) {
-        Optional<Sale> existingSaleOpt = saleRepository.findById(id);
+        Sale existingSale = saleRepository.findById(id)
+                .orElseThrow(() -> new SaleNotFoundException("Sale with ID " + id + " not found."));
 
-        if (existingSaleOpt.isPresent()) {
-            Sale existingSale = existingSaleOpt.get();
-            existingSale.setClientName(updatedSaleDTO.getClientName());
-            existingSale.setSaleDate(updatedSaleDTO.getSaleDate());
-            existingSale.setUnitPrice(updatedSaleDTO.getUnitPrice());
-            existingSale.setQuantity(updatedSaleDTO.getQuantity());
-            existingSale.setHarvestId(updatedSaleDTO.getHarvestId());
+        Long harvestId = updatedSaleDTO.getHarvestId();
+        Harvest harvest = harvestRepository.findById(harvestId)
+                .orElseThrow(() -> new FieldNotFoundException("Harvest with ID " + harvestId + " not found."));
 
-            Sale updatedSale = saleRepository.save(existingSale);
-            return saleMapper.toDTO(updatedSale);
-        } else {
-            throw new IllegalArgumentException("Sale with ID " + id + " not found.");
-        }
+        double totalQuantity = harvest.getTotalQuantity();
+        updatedSaleDTO.setQuantity(totalQuantity);
+
+        double revenue = totalQuantity * updatedSaleDTO.getUnitPrice();
+        updatedSaleDTO.setRevenue(revenue);
+
+        existingSale.setClientName(updatedSaleDTO.getClientName());
+        existingSale.setSaleDate(updatedSaleDTO.getSaleDate());
+        existingSale.setUnitPrice(updatedSaleDTO.getUnitPrice());
+        existingSale.setHarvestId(updatedSaleDTO.getHarvestId());
+
+        Sale updatedSale = saleRepository.save(existingSale);
+        return saleMapper.toDTO(updatedSale);
     }
 
-    // Delete Sale by ID
+
     public void delete(Long id) {
         Optional<Sale> sale = saleRepository.findById(id);
 

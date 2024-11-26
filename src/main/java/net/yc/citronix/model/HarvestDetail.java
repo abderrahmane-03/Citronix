@@ -29,6 +29,5 @@ public class HarvestDetail {
 
     @ManyToOne
     @JoinColumn(name = "harvest_id", nullable = false)
-    @JsonBackReference
     private Harvest harvest;
 }

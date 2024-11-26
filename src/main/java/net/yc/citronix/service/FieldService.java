@@ -1,5 +1,6 @@
 package net.yc.citronix.service;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.FieldDTO;
 import net.yc.citronix.mapper.FieldMapper;
 import net.yc.citronix.model.Farm;
@@ -9,7 +10,6 @@ import net.yc.citronix.repository.FarmRepository;
 import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.TreeRepository;
 import net.yc.citronix.serviceInterface.FieldServiceINF;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,38 +17,34 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FieldService implements FieldServiceINF {
 
-    @Autowired
-    private FieldRepository fieldRepository;
+    private final FieldRepository fieldRepository;
 
-    @Autowired
-    private FarmRepository farmRepository;
+    private final FarmRepository farmRepository;
 
-    @Autowired
-    private TreeRepository treeRepository;
+    private final TreeRepository treeRepository;
 
-    @Autowired
-    private FieldMapper fieldMapper;
+    private final FieldMapper fieldMapper;
 
 
-    // In FieldService
     public List<Tree> getTreesByFieldId(Long fieldId) {
         return treeRepository.findByFieldId(fieldId);
     }
 
     public FieldDTO save(FieldDTO fieldDTO) {
-        // Fetch the associated farm
-        Long farmId = fieldDTO.getFarmId();
+
+        Long farmId = fieldDTO.getFarm().getId();
         Optional<Farm> optionalFarm = farmRepository.findById(farmId);
 
         if (optionalFarm.isEmpty()) {
-            throw new IllegalArgumentException("Farm not found for ID: " + fieldDTO.getFarmId());
+            throw new IllegalArgumentException("Farm not found for ID: " + fieldDTO.getFarm().getId());
         }
 
         Farm farm = optionalFarm.get();
 
-        // Validate the number of fields for the farm
+
         long fieldCount = fieldRepository.countByFarmId(farm.getId());
         if (fieldCount >= 10) {
             throw new IllegalArgumentException(
@@ -56,7 +52,7 @@ public class FieldService implements FieldServiceINF {
             );
         }
 
-        // Validate the 50% size rule
+
         if (fieldDTO.getSize() > farm.getSize() * 0.5) {
             throw new IllegalArgumentException(
                     "Field size cannot exceed 50% of the total farm size. " +
@@ -64,7 +60,7 @@ public class FieldService implements FieldServiceINF {
             );
         }
 
-        // Calculate the maximum tree count based on field size
+
         int maxTreeCount = calculateMaxTreeCount(fieldDTO.getSize());
         fieldDTO.setTreeCount(maxTreeCount);
 
@@ -75,8 +71,7 @@ public class FieldService implements FieldServiceINF {
     }
 
     public int calculateMaxTreeCount(double fieldSize) {
-        // Convert field size from m² to hectares and multiply by 100 trees per hectare
-        return (int) Math.floor((fieldSize / 10000) * 100);
+        return (int) Math.floor(fieldSize * 100);
     }
 
 
@@ -89,17 +84,45 @@ public class FieldService implements FieldServiceINF {
 
 
     public FieldDTO update(Long id, FieldDTO updatedFieldDTO) {
+        // Retrieve the existing field
         Optional<Field> existingFieldOpt = fieldRepository.findById(id);
-
-        if (existingFieldOpt.isPresent()) {
-            Field existingField = existingFieldOpt.get();
-            existingField.setSize(updatedFieldDTO.getSize());
-            existingField.setTreeCount(updatedFieldDTO.getTreeCount());
-            Field updatedField = fieldRepository.save(existingField);
-            return fieldMapper.toDTO(updatedField);
-        } else {
+        if (existingFieldOpt.isEmpty()) {
             throw new IllegalArgumentException("Field with ID " + id + " not found.");
         }
+        Field existingField = existingFieldOpt.get();
+
+
+        Long farmId = updatedFieldDTO.getFarm().getId();
+        Optional<Farm> optionalFarm = farmRepository.findById(farmId);
+        if (optionalFarm.isEmpty()) {
+            throw new IllegalArgumentException("Farm not found for ID: " + updatedFieldDTO.getFarm().getId());
+        }
+        Farm farm = optionalFarm.get();
+
+
+        long fieldCount = fieldRepository.countByFarmId(farm.getId());
+        if (fieldCount > 10) {
+            throw new IllegalArgumentException(
+                    "A farm cannot have more than 10 fields. Current field count: " + fieldCount
+            );
+        }
+
+        if (updatedFieldDTO.getSize() > farm.getSize() * 0.5) {
+            throw new IllegalArgumentException(
+                    "Field size cannot exceed 50% of the total farm size. " +
+                            "Farm size: " + farm.getSize() + ", Max allowed: " + (farm.getSize() * 0.5)
+            );
+        }
+
+        int maxTreeCount = calculateMaxTreeCount(updatedFieldDTO.getSize());
+        updatedFieldDTO.setTreeCount(maxTreeCount);
+
+        existingField.setSize(updatedFieldDTO.getSize());
+        existingField.setTreeCount(updatedFieldDTO.getTreeCount());
+        existingField.setFarm(farm);
+
+        Field updatedField = fieldRepository.save(existingField);
+        return fieldMapper.toDTO(updatedField);
     }
 
 

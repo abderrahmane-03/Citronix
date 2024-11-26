@@ -1,6 +1,9 @@
 package net.yc.citronix.service;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.TreeDTO;
+import net.yc.citronix.exceptions.FieldNotFoundException;
+import net.yc.citronix.exceptions.TreeNotFoundException;
 import net.yc.citronix.mapper.TreeMapper;
 import net.yc.citronix.model.Field;
 import net.yc.citronix.model.Tree;
@@ -18,113 +21,116 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TreeService implements TreeServiceINF {
 
-        @Autowired
-        private FieldRepository fieldRepository;
 
-        @Autowired
-        private TreeRepository treeRepository;
+        private final FieldRepository fieldRepository;
 
-        @Autowired
-        private TreeMapper treeMapper;
+        private final TreeRepository treeRepository;
 
-        // Save Tree using DTO
+        private final TreeMapper treeMapper;
+
         public TreeDTO save(TreeDTO treeDTO) {
-            // Fetch the field ID associated with the tree
-            Long fieldId = treeDTO.getFieldId();
-            if (fieldId == null) {
-                throw new IllegalArgumentException("Field ID cannot be null.");
+                Long fieldId = treeDTO.getField().getId();
+
+                if (fieldId == null) {
+                    throw new FieldNotFoundException("Field ID cannot be null.");
+                }
+
+                Optional<Field> optionalField = fieldRepository.findById(fieldId);
+                if (optionalField.isEmpty()) {
+                    throw new IllegalArgumentException("Field not found for ID: " + fieldId);
+                }
+
+                Field field = optionalField.get();
+                treeDTO.setField(field);
+
+                int maxTreeCount = calculateMaxTreeCount(field.getSize());
+
+                long currentTreeCount = treeRepository.countByFieldId(fieldId);
+                if (currentTreeCount >= maxTreeCount) {
+                    throw new IllegalArgumentException(
+                            "Cannot add more trees to this field. Maximum allowed: " + maxTreeCount +
+                                    ", Current: " + currentTreeCount
+                    );
+                }
+
+                calculateAndSetTreeAge(treeDTO);
+
+
+                validateTree(treeDTO);
+
+                Tree tree = treeMapper.toEntity(treeDTO);
+                Tree savedTree = treeRepository.save(tree);
+
+                return treeMapper.toDTO(savedTree);
             }
 
-            // Fetch the field details (assuming a FieldService or FieldRepository exists)
-            Optional<Field> optionalField = fieldRepository.findById(fieldId);
-            if (optionalField.isEmpty()) {
-                throw new IllegalArgumentException("Field not found for ID: " + fieldId);
-            }
-
-            Field field = optionalField.get();
-
-            // Calculate the maximum tree count for the field
-            int maxTreeCount = calculateMaxTreeCount(field.getSize());
-
-            // Count the current number of trees in the field
-            long currentTreeCount = treeRepository.countByFieldId(fieldId);
-            if (currentTreeCount >= maxTreeCount) {
-                throw new IllegalArgumentException(
-                        "Cannot add more trees to this field. Maximum allowed: " + maxTreeCount +
-                                ", Current: " + currentTreeCount
-                );
-            }
-
-            // Calculate and set tree age
-            calculateAndSetTreeAge(treeDTO);
-
-            // Validate the tree
-            validateTree(treeDTO);
-
-            // Map DTO to entity and save
-            Tree tree = treeMapper.toEntity(treeDTO);
-            Tree savedTree = treeRepository.save(tree);
-
-            // Return the saved entity as a DTO
-            return treeMapper.toDTO(savedTree);
-        }
-
-    // Helper method to calculate the maximum tree count based on field size
     public int calculateMaxTreeCount(double fieldSize) {
-        // Convert field size from m² to hectares and multiply by 100 trees per hectare
-        return (int) Math.floor((fieldSize / 10000) * 100);
+        return (int) Math.floor(fieldSize * 100);
     }
 
     public void calculateAndSetTreeAge(TreeDTO treeDTO) {
         LocalDate plantationDate = treeDTO.getPlantationDate();
         long age = ChronoUnit.YEARS.between(plantationDate, LocalDate.now());
 
-        // Ensure age is always positive
         if (age < 0) {
             throw new IllegalArgumentException("Plantation date cannot be in the future.");
         }
         if (age<20){
             treeDTO.setProductive(true);
         }
-        treeDTO.setAge((int) age); // Assuming age is an integer
+        treeDTO.setAge((int) age);
     }
     public void validateTree(TreeDTO treeDTO) {
         LocalDate plantationDate = treeDTO.getPlantationDate();
         Month month = plantationDate.getMonth();
 
-        // Validate if plantation date is between March and May
         if (month.getValue() < Month.MARCH.getValue() || month.getValue() > Month.MAY.getValue()) {
             throw new IllegalArgumentException("Tree can only be planted between March and May.");
         }
 
     }
-        // Get all Trees and return as DTOs
         public List<TreeDTO> show() {
             return treeRepository.findAll()
                     .stream()
-                    .map(treeMapper::toDTO) // Convert each Tree entity to DTO
+                    .map(treeMapper::toDTO)
                     .collect(Collectors.toList());
         }
 
-        // Update Tree using DTO
+        @Override
         public TreeDTO update(Long id, TreeDTO updatedTreeDTO) {
-            Optional<Tree> existingTreeOpt = treeRepository.findById(id);
+            Tree existingTree = treeRepository.findById(id)
+                    .orElseThrow(() -> new TreeNotFoundException("Tree with ID " + id + " not found."));
 
-            if (existingTreeOpt.isPresent()) {
-                Tree existingTree = existingTreeOpt.get();
-                existingTree.setPlantationDate(updatedTreeDTO.getPlantationDate());
-                existingTree.setAge(updatedTreeDTO.getAge());
-                existingTree.setFieldId(updatedTreeDTO.getFieldId());
-                Tree updatedTree = treeRepository.save(existingTree);
-                return treeMapper.toDTO(updatedTree);
-            } else {
-                throw new IllegalArgumentException("Tree with ID " + id + " not found.");
+            Long fieldId = updatedTreeDTO.getField().getId();
+            Field field = fieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new FieldNotFoundException("Field with ID " + fieldId + " not found."));
+
+            int maxTreeCount = calculateMaxTreeCount(field.getSize());
+
+            long currentTreeCount = treeRepository.countByFieldId(fieldId);
+
+            if (currentTreeCount > maxTreeCount) {
+                throw new IllegalArgumentException(
+                        "Cannot exceed the maximum allowed trees for this field. Maximum allowed: " + maxTreeCount +
+                                ", Current: " + currentTreeCount
+                );
             }
+
+            validateTree(updatedTreeDTO);
+
+            calculateAndSetTreeAge(updatedTreeDTO);
+
+            existingTree.setPlantationDate(updatedTreeDTO.getPlantationDate());
+            existingTree.setField(field);
+
+            Tree updatedTree = treeRepository.save(existingTree);
+            return treeMapper.toDTO(updatedTree);
         }
 
-        // Delete Tree by ID
+
         public void delete(Long id) {
             Optional<Tree> tree = treeRepository.findById(id);
 

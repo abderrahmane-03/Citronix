@@ -18,7 +18,5 @@ public interface HarvestDetailServiceINF {
 
      List<HarvestDetailDTO> show();
 
-     HarvestDetailDTO update(Long id, HarvestDetailDTO updatedHarvestDetailDTO);
-
      void delete(Long id);
 }

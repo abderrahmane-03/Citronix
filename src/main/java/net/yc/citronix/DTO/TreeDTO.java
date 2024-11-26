@@ -4,16 +4,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
+import net.yc.citronix.model.Field;
+
 import java.time.LocalDate;
 
 @Data
 public class TreeDTO {
 
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id ;
-
     @JsonFormat(pattern = "yyyy-M-d")
     @PastOrPresent(message = "Creation date cannot be in the future.")
     @NotNull(message = "Plantation date is required.")
@@ -21,12 +20,10 @@ public class TreeDTO {
     private LocalDate plantationDate;
 
     @Column(nullable = false)
-    private int age; // Automatically calculated based on plantation date
+    private int age;
 
     @NotNull(message = "Field ID is required.")
-    @Column(name = "field_id", nullable = false)
-    private Long fieldId; // Reference to the field where the tree is located
+    private Field field;
 
-    @Transient
     private boolean productive;
 }

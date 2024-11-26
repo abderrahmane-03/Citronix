@@ -6,4 +6,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(config = BaseMapper.class)
 public interface FieldMapper extends BaseMapper<Field, FieldDTO> {
+
 }

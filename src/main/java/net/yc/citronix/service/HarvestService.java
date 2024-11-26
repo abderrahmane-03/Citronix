@@ -1,7 +1,10 @@
 package net.yc.citronix.service;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.HarvestDTO;
+import net.yc.citronix.DTO.HarvestDetailDTO;
 import net.yc.citronix.enums.Season;
+import net.yc.citronix.mapper.HarvestDetailMapper;
 import net.yc.citronix.mapper.HarvestMapper;
 import net.yc.citronix.model.Field;
 import net.yc.citronix.model.Harvest;
@@ -9,8 +12,8 @@ import net.yc.citronix.model.HarvestDetail;
 import net.yc.citronix.model.Tree;
 import net.yc.citronix.repository.FieldRepository;
 import net.yc.citronix.repository.HarvestRepository;
+import net.yc.citronix.serviceInterface.FieldServiceINF;
 import net.yc.citronix.serviceInterface.HarvestServiceINF;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,116 +21,134 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class HarvestService implements HarvestServiceINF {
 
-    @Autowired
-    private FieldService fieldService;
+    private final FieldServiceINF fieldService;
 
-    @Autowired
-    private HarvestRepository harvestRepository;
+    private final HarvestRepository harvestRepository;
 
-    @Autowired
-    private HarvestMapper harvestMapper;
-    @Autowired
-    private FieldRepository fieldRepository;
+    private final HarvestMapper harvestMapper;
+
+    private final HarvestDetailMapper harvestDetailMapper;
+
+
+    private final FieldRepository fieldRepository;
 
     public HarvestDTO generateHarvest(HarvestDTO harvestDTO) {
 
-        Long fieldId = harvestDTO.getFieldId();
-        // Fetch trees in the field using the fieldId (Assume `FieldService` provides tree data)
+        Long fieldId = harvestDTO.getField().getId();
         List<Tree> trees = fieldService.getTreesByFieldId(fieldId);
 
-        // Calculate HarvestDetails
-        List<HarvestDetail> harvestDetails = trees.stream()
-                .map(tree -> HarvestDetail.builder()
+        List<HarvestDetailDTO> harvestDetails = trees.stream()
+                .map(tree -> HarvestDetailDTO.builder()
                         .treeId(tree.getId())
                         .quantity(calculateTreeProductivity(tree.getAge()))
                         .build())
                 .collect(Collectors.toList());
 
 
-        // Set HarvestDetails and totalQuantity in the HarvestDTO
-        double totalQuantity = harvestDetails.stream().mapToDouble(HarvestDetail::getQuantity).sum();
+        double totalQuantity = harvestDetails.stream().mapToDouble(HarvestDetailDTO::getQuantity).sum();
         harvestDTO.setHarvestDetails(harvestDetails);
         harvestDTO.setTotalQuantity(totalQuantity);
-        // Save the harvest
-        return save(harvestDTO); // Save method already implemented
+        return save(harvestDTO);
     }
 
-    // Helper method to calculate productivity based on age
     public double calculateTreeProductivity(int age) {
         if (age < 3) {
-            return 2.5; // Young tree productivity
+            return 2.5;
         } else if (age <= 10) {
-            return 12; // Mature tree productivity
+            return 12;
         } else if(age <20) {
-            return 20; // Old tree productivity
+            return 20;
         }
         else {
-            return 0; // Old tree productivity
+            return 0;
         }
     }
     public Season determineSeason(int month) {
-        if (month == 12 || month == 1 || month == 2) {
-            return Season.WINTER;
-        } else if (month >= 3 && month <= 5) {
-            return Season.SPRING;
-        } else if (month >= 6 && month <= 8) {
-            return Season.SUMMER;
-        } else {
-            return Season.AUTUMN;
+        switch (month) {
+            case 11: case 12: case 1: case 2:
+                return Season.WINTER;
+            case 3: case 4: case 5:
+                return Season.SPRING;
+            case 6: case 7: case 8:
+                return Season.SUMMER;
+            case 9: case 10:
+                return Season.AUTUMN;
+            default:
+                throw new IllegalArgumentException("Invalid month: " + month);
         }
     }
-    // Save Harvest using DTO
-    public HarvestDTO save(HarvestDTO harvestDTO) {
 
-        Long fieldId = harvestDTO.getFieldId();
-        Optional<Field> byId = fieldRepository.findById(fieldId);
-        boolean exists = harvestRepository.existsByFieldAndSeason(byId, harvestDTO.getSeason());
+    public HarvestDTO save(HarvestDTO harvestDTO) {
+        Long fieldId = harvestDTO.getField().getId();
+        Field field = fieldRepository.findById(fieldId)
+                .orElseThrow(() -> new IllegalArgumentException("Field with ID " + fieldId + " not found."));
+
+        boolean exists = harvestRepository.existsByFieldAndSeason(field, harvestDTO.getSeason());
+        if (exists) {
+            throw new IllegalArgumentException("A harvest already exists for this field and season.");
+        }
 
         if (harvestDTO.getHarvestDate() != null) {
             harvestDTO.setSeason(determineSeason(harvestDTO.getHarvestDate().getMonthValue()));
         }
-        if (exists) {
-            throw new IllegalArgumentException("A harvest already exists for this field and season.");
-        }
+
         Harvest harvest = harvestMapper.toEntity(harvestDTO);
 
-        // Set harvest in each harvest detail
-        harvest.getHarvestDetails().forEach(detail -> detail.setHarvest(harvest));
+        harvest.setField(field);
 
-        // Save the harvest and its details
+        if (harvest.getHarvestDetails() != null) {
+            harvest.getHarvestDetails().forEach(detail -> detail.setHarvest(harvest));
+        }
+
         Harvest savedHarvest = harvestRepository.save(harvest);
         return harvestMapper.toDTO(savedHarvest);
     }
 
 
-    // Get all Harvests and return as DTOs
+
+
     public List<HarvestDTO> show() {
         return harvestRepository.findAll()
                 .stream()
-                .map(harvestMapper::toDTO) // Convert each Harvest entity to DTO
+                .map(harvestMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Update Harvest using DTO
+    @Override
     public HarvestDTO update(Long id, HarvestDTO updatedHarvestDTO) {
-        Optional<Harvest> existingHarvestOpt = harvestRepository.findById(id);
+        Harvest existingHarvest = harvestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Harvest with ID " + id + " not found."));
 
-        if (existingHarvestOpt.isPresent()) {
-            Harvest existingHarvest = existingHarvestOpt.get();
-            existingHarvest.setSeason(updatedHarvestDTO.getSeason());
-            existingHarvest.setHarvestDate(updatedHarvestDTO.getHarvestDate());
-            existingHarvest.setTotalQuantity(updatedHarvestDTO.getTotalQuantity());
-            existingHarvest.setHarvestDetails(updatedHarvestDTO.getHarvestDetails());
-            Harvest updatedHarvest = harvestRepository.save(existingHarvest);
-            return harvestMapper.toDTO(updatedHarvest);
-        } else {
-            throw new IllegalArgumentException("Harvest with ID " + id + " not found.");
+        Long fieldId = updatedHarvestDTO.getField().getId();
+        Field field = fieldRepository.findById(fieldId)
+                .orElseThrow(() -> new IllegalArgumentException("Field with ID " + fieldId + " not found."));
+
+        boolean exists = harvestRepository.existsByFieldAndSeasonAndIdNot(field, updatedHarvestDTO.getSeason(), id);
+        if (exists) {
+            throw new IllegalArgumentException("A harvest already exists for this field and season.");
         }
+
+        if (updatedHarvestDTO.getHarvestDate() != null) {
+            updatedHarvestDTO.setSeason(determineSeason(updatedHarvestDTO.getHarvestDate().getMonthValue()));
+        }
+
+        existingHarvest.setSeason(updatedHarvestDTO.getSeason());
+        existingHarvest.setHarvestDate(updatedHarvestDTO.getHarvestDate());
+        existingHarvest.setTotalQuantity(updatedHarvestDTO.getTotalQuantity());
+
+        List<HarvestDetail> harvestDetails = harvestDetailMapper.toEntities(updatedHarvestDTO.getHarvestDetails());
+        harvestDetails.forEach(detail -> detail.setHarvest(existingHarvest));
+        existingHarvest.setHarvestDetails(harvestDetails);
+
+        existingHarvest.setField(field);
+
+        Harvest updatedHarvest = harvestRepository.save(existingHarvest);
+        return harvestMapper.toDTO(updatedHarvest);
     }
 
-    // Delete Harvest by ID
     public void delete(Long id) {
         Optional<Harvest> harvest = harvestRepository.findById(id);
 

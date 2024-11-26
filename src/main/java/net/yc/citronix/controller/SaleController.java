@@ -1,8 +1,10 @@
 package net.yc.citronix.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.yc.citronix.DTO.SaleDTO;
 import net.yc.citronix.model.Sale;
 import net.yc.citronix.service.SaleService;
+import net.yc.citronix.serviceInterface.SaleServiceINF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -10,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/sale")
 public class SaleController {
 
-    @Autowired
-    private SaleService saleService;
+
+    private final SaleServiceINF saleService;
 
 
     @PostMapping("/create")
